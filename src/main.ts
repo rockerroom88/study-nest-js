@@ -7,5 +7,6 @@ async function bootstrap() {
 }
 
 (async () => {
+    console.log(__dirname)
     await bootstrap();
 })();
