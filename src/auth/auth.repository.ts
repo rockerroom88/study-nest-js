@@ -4,7 +4,7 @@ import { User } from '../user/user.entity';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
-export class AuthRepository extends Repository<User>{
+export class AuthRepository extends Repository<User> {
     constructor(private dataSource: DataSource) {
         super(User, dataSource.createEntityManager());
     }

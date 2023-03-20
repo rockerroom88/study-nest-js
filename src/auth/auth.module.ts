@@ -8,14 +8,17 @@ import { AuthRepository } from './auth.repository';
 import { JwtStrategy } from '../_config/jwt/jwt.strategy';
 import { User } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
+import * as config from 'config';
+
+const jwtConfig = config.get('jwt');
 
 @Module({
     imports: [
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
-            secret: 'ksd',
+            secret: jwtConfig.secret,
             signOptions: {
-                expiresIn: 3600
+                expiresIn: process.env.JWR_SECRET || jwtConfig.expiresIn
             }
         }),
         TypeOrmModule.forFeature([User])
