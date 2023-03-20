@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { UserRepository } from './user.repository';
-import { User } from './etc/user.entity';
-import { CreateUserDto, PatchUserDto } from './etc/user.dtos';
+import { User } from './user.entity';
+import { CreateUserDto, PatchUserDto } from './user.dtos';
 
 @Injectable()
 export class UserService {
-    // 데코레이터를 이용하여 이 서비스에서 Repository를 이용한다고 선언
-    constructor(private userRepository: UserRepository) {}
+
+    constructor(
+        private userRepository: UserRepository
+    ) {}
 
     async getAllUser(): Promise<User[]> {
         return await this.userRepository.getAllUser();
@@ -16,15 +18,16 @@ export class UserService {
         return await this.userRepository.getUserById(id);
     }
 
-    async postUser(createUserDto: CreateUserDto): Promise<User> {
-        return await this.userRepository.postUser(createUserDto);
+    async postUser(createUserDto: CreateUserDto): Promise<void> {
+        await this.userRepository.postUser(createUserDto);
     }
 
     async patchUserById(id: number, patchUserDto: PatchUserDto): Promise<User> {
         return await this.userRepository.patchUserById(id, patchUserDto);
     }
 
-    async deleteUserById(id: number): Promise<void> {
+    async deleteUserById(id: number): Promise<number> {
         return await this.userRepository.deleteUserById(id);
     }
+
 }

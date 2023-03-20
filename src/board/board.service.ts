@@ -1,50 +1,31 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { BoardRepository } from './board.repository';
-import { Board } from './etc/board.entity';
-import { CreateBoardDto } from './etc/board.dto';
-import { BoardStatus } from './etc/board-status.enum';
+import { Board } from './board.entity';
+import { CreateBoardDto } from './board.dtos';
+import { BoardStatus } from './board.enum';
 
 @Injectable()
 export class BoardService {
 
-    // 데코레이터를 이용하여 이 서비스에서 BoardRepository를 이용한다고 선언
-    constructor(@InjectRepository(Board) private boardRepository: BoardRepository) {}
+    constructor(private boardRepository: BoardRepository) {}
 
     async getAllBoard(): Promise<Board[]> {
-        return await this.boardRepository.find();
+        return await this.boardRepository.getAllBoard();
     }
 
     async getBoardById(id: number): Promise<Board> {
-        const board$ = await this.boardRepository.findOneBy({ id });
-        if (!board$) {
-            throw new NotFoundException(`Can't find Board with id ${id}`);
-        }
-        return board$;
+        return await this.boardRepository.getBoardById(id);
     }
 
     async postBoardByDto(createBoardDto: CreateBoardDto): Promise<Board> {
-        const { title, description } = createBoardDto;
-        const board = await this.boardRepository.create({
-            title,
-            description,
-            status: BoardStatus.PUBLIC
-        });
-        await this.boardRepository.save(board);
-        return board;
+        return await this.boardRepository.postBoard(createBoardDto);
     }
 
     async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
-        const board = await this.getBoardById(id);
-        board.status = status;
-        await this.boardRepository.save(board);
-        return board;
+        return await this.boardRepository.updateBoardStatus(id, status);
     }
 
-    async deleteBoard(id: number): Promise<void> {
-        const result = await this.boardRepository.delete(id);
-        if (result.affected === 0) {
-            throw new NotFoundException(`Can't find Board with id ${id}`);
-        }
+    async deleteBoard(id: number): Promise<number> {
+        return await this.boardRepository.deleteBoard(id);
     }
 }

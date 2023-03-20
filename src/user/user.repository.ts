@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { User } from './etc/user.entity';
-import { CreateUserDto, PatchUserDto } from './etc/user.dtos';
+import { CreateUserDto, PatchUserDto } from './user.dtos';
+import { User } from './user.entity';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserRepository extends Repository<User> {
@@ -17,13 +18,33 @@ export class UserRepository extends Repository<User> {
         return await this.findOneBy({ id });
     }
 
-    async postUser(createUserDto: CreateUserDto): Promise<User> {
+    async postUser(createUserDto: CreateUserDto): Promise<void> {
         const { username, password } = createUserDto;
+
+        const salt = await bcrypt.genSalt();
+        const hashedPwd = await bcrypt.hash(password, salt);
+
+        const user = this.create({
+            username,
+            password: hashedPwd
+        });
+
+        try {
+            await user.save();
+        } catch (e) {
+            if (e.code === '23505') {
+                throw new ConflictException('Existing username');
+            } else {
+                throw new InternalServerErrorException();
+            }
+        }
+
+        /**
         const user = await this.create({
             username,
             password
         }).save();
-        return user;
+        */
     }
 
     async patchUserById(id: number, patchUserDto: PatchUserDto): Promise<User> {
@@ -32,15 +53,16 @@ export class UserRepository extends Repository<User> {
         if (user) {
             user.username = username;
             user.password = password;
-            await this.save(user);
+            return await this.save(user);
         }
-        return user;
     }
 
-    async deleteUserById(id: number): Promise<void> {
-        const r = await this.delete({id});
+    async deleteUserById(id: number): Promise<number> {
+        const r = await this.delete(id);
         if (!r.affected) {
-            throw new NotFoundException(`Can't find Board with id ${id}`);
+            throw new NotFoundException(`Can't find User with id ${id}`);
         }
+        return r.affected;
     }
+
 }

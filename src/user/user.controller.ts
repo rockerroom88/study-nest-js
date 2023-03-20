@@ -1,34 +1,39 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from './etc/user.entity';
-import { CreateUserDto, PatchUserDto } from './etc/user.dtos';
+import { User } from './user.entity';
+import { CreateUserDto, PatchUserDto } from './user.dtos';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController {
     constructor(private userService: UserService) {}
 
     @Get()
+    @UseGuards(AuthGuard())
     async getAllUser(): Promise<User[]> {
         return await this.userService.getAllUser();
     }
 
     @Get('/:id')
+    @UseGuards(AuthGuard())
     async getUserById(@Param('id') id: number): Promise<User> {
         return await this.userService.getUserById(id);
     }
 
     @Post()
-    async postUser(@Body() createUserDto: CreateUserDto): Promise<User> {
-        return await this.userService.postUser(createUserDto);
+    async postUser(@Body() createUserDto: CreateUserDto): Promise<void> {
+        await this.userService.postUser(createUserDto);
     }
 
     @Patch('/:id')
+    @UseGuards(AuthGuard())
     async patchUserById(@Param('id', ParseIntPipe) id: number, @Body(ValidationPipe) patchUserDto: PatchUserDto): Promise<User> {
         return await this.userService.patchUserById(id, patchUserDto);
     }
 
     @Delete('/:id')
-    async deleteUserById(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    @UseGuards(AuthGuard())
+    async deleteUserById(@Param('id', ParseIntPipe) id: number): Promise<number> {
         return await this.userService.deleteUserById(id);
     }
 
