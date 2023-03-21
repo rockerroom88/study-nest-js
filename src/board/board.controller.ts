@@ -7,7 +7,7 @@ import { BoardValidation } from './board.validation';
 import { AuthGuard } from '@nestjs/passport';
 import { User } from '../user/user.entity';
 import { GetUser } from '../_dec/decorators';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 @Controller('board')
 @UseGuards(AuthGuard())

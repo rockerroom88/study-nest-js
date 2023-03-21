@@ -15,7 +15,7 @@ import { AppService } from './app.service';
         TypeOrmModule.forRoot(typeORMConfig),
         AuthModule,
         UserModule,
-        BoardModule
+        BoardModule,
     ],
     controllers: [AppController],
     providers: [AppService]
